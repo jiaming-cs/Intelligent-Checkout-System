@@ -36,14 +36,33 @@ git clone https://github.com/jiamingli9674/Intelligent-Checkout-System.git
 
 ```
 
+
+
+### Create Virtual Environment (on Windows 10)
+
+```
+virtualenv venv --python=3.6
+
+```
+
 ### Activate Virtual Environment (on Windows 10)
 
 ```
-cd /Intelligent-Checkout-System/venv/Scripts
-
+cd vev/Scrips/
 activate
 
 ```
+
+### Install librarys via requirements.txt
+
+```
+Go to the root folder
+
+pip install -r requirements.txt
+
+```
+
+
 
 ### Run our the face recognition and anti-spoofing test
 
