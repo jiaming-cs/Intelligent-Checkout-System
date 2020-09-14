@@ -50,7 +50,7 @@ conda create -n venv python=3.6
 ### Activate Virtual Environment (on Windows 10)
 
 ```
-cd vev/Scripts/
+cd venv/Scripts/
 activate
 or
 conda activate venv
