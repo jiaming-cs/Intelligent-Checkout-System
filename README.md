@@ -42,14 +42,18 @@ git clone https://github.com/jiamingli9674/Intelligent-Checkout-System.git
 
 ```
 virtualenv venv --python=3.6
+or
+conda create -n venv python=3.6
 
 ```
 
 ### Activate Virtual Environment (on Windows 10)
 
 ```
-cd vev/Scrips/
+cd vev/Scripts/
 activate
+or
+conda activate venv
 
 ```
 
