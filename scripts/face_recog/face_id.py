@@ -4,8 +4,7 @@ import numpy as np
 import os
 import sys 
 import pickle
-from const.consts import IMAGE_DIR, DATA_DIR, FACE_DISTANCE_THRESHOLD, UNKNOWN
-
+from const.consts import IMAGE_DIR, DATA_DIR, FACE_DISTANCE_THRESHOLD, UNKNOWN, PICKEL_FILE_NAME
 
 class FaceId:
     def __init__(self):
@@ -18,10 +17,10 @@ class FaceId:
         Load face ids from pickle file
 
         """
-        if not os.path.exists(os.path.join(DATA_DIR, "face_encodings.pkl")) or os.path.getsize(os.path.join(DATA_DIR, "face_encodings.pkl")) <= 0:
+        if not os.path.exists(os.path.join(DATA_DIR, PICKEL_FILE_NAME)) or os.path.getsize(os.path.join(DATA_DIR, PICKEL_FILE_NAME)) <= 0:
             return {}
 
-        with open(os.path.join(DATA_DIR, "face_encodings.pkl"), "rb") as f:
+        with open(os.path.join(DATA_DIR, PICKEL_FILE_NAME), "rb") as f:
             face_encodings = pickle.load(f)
         return face_encodings
 
@@ -38,7 +37,7 @@ class FaceId:
         # Return if there is no new images to be encoded
         
         
-        with open(os.path.join(DATA_DIR, "face_encodings.pkl"), "wb") as f:
+        with open(os.path.join(DATA_DIR, PICKEL_FILE_NAME), "wb") as f:
             for image_name in os.listdir(IMAGE_DIR):
                 user_full_name = image_name.split('.')[0]
                 image = face_recognition.load_image_file(os.path.join(IMAGE_DIR, image_name))

@@ -19,3 +19,5 @@ FACE_DISTANCE_THRESHOLD = 0.5
 UNKNOWN = "unknow"
 
 SKIP_FRAMES = 5
+
+PICKEL_FILE_NAME = "face_encodings.pkl"
