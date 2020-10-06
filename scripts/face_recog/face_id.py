@@ -24,13 +24,15 @@ class FaceId:
             face_encodings = pickle.load(f)
         return face_encodings
 
-    def encode_faces(self):
+    def encode_faces(self, encode_new_faces = False):
         '''
         Encode faces from image folder (if any) under root directory.
         The encoded object will be stored in pickle files.
         Images are expected named with format firstname_lastname.jpg
         {"name0":obj, "name1":obj} 
         '''
+        if not encode_new_faces:
+            return
         
         if not os.listdir(IMAGE_DIR):
             return
