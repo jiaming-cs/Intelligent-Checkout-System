@@ -1,2 +1,5 @@
 *.pyc
 .vscode
+/venv
+**/__pycache__
+mask_rcnn_d2s_0100.h5
