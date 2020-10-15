@@ -24,7 +24,7 @@ from mrcnn.config import Config
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 
 # Local path to trained weights file
-COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_d2s_0100.h5")
+COCO_MODEL_PATH = os.path.join(ROOT_DIR, "models", "mask_rcnn_model", "mask_rcnn_d2s_0100.h5")
 # Download COCO trained weights from Releases if needed
 # if not os.path.exists(COCO_MODEL_PATH):
 #     utils.download_trained_weights(COCO_MODEL_PATH)

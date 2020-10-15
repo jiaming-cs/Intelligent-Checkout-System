@@ -2,4 +2,4 @@
 .vscode
 /venv
 **/__pycache__
-mask_rcnn_d2s_0100.h5
+/models/mask_rcnn_model/mask_rcnn_d2s_0100.h5
