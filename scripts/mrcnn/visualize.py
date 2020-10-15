@@ -169,7 +169,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     ax.imshow(masked_image.astype(np.uint8))
     from PIL import Image
     im = Image.fromarray(masked_image.astype(np.uint8))
-    im.save("result.png")
+   
     if auto_show:
         plt.show()
 
