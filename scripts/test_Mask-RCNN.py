@@ -30,7 +30,7 @@ COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_d2s_0100.h5")
 #     utils.download_trained_weights(COCO_MODEL_PATH)
 
 # Directory of images to run detection on
-IMAGE_DIR = os.path.join(ROOT_DIR, "images")
+IMAGE_DIR = os.path.join(ROOT_DIR, "test_img")
 
 class CocoConfig(Config):
     """Configuration for training on MS COCO.

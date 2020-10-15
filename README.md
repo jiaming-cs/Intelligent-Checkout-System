@@ -92,6 +92,6 @@ pip install ipython
 ### Run our Mask R-CNN test
 
 ```
-(venv)~/Intelligent-Checkout-System/scripts python python python test_RCNN.py 
+(venv)~/Intelligent-Checkout-System/scripts python test_Mask-RCNN
 
 ```
