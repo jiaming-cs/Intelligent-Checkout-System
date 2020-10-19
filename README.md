@@ -61,23 +61,10 @@ conda activate venv
 ```
 pip install -r requirements.txt 
 
-OR
-
-pip install keras==2.3.1
 
 pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
-pip install face_recognition
 
-pip install opencv-python
-
-pip install scikit-image
-
-pip install matplotlib==3.3.0
-
-pip install tensorflow==2.1.0
-
-pip install ipython
 ```
 
 
