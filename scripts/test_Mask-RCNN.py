@@ -20,6 +20,7 @@ from mrcnn import visualize
 from mrcnn.config import Config
 
 
+
 # Directory to save logs and trained model
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 
@@ -63,8 +64,7 @@ class InferenceConfig(CocoConfig):
     GPU_COUNT = 1
 
     # Number of classes (including background)
-    NUM_CLASSES = 1 + 12  # COCO has 80 classes
-
+    NUM_CLASSES = 1 + 12  # D2S has 13 classes
 config = InferenceConfig()
 config.display()
 
@@ -75,7 +75,7 @@ model.load_weights(COCO_MODEL_PATH, by_name=True)
 class_names = ["background", "coca", 'coca_cola_light_05', 'avocado', 'banana_bundle', 'banana_single', 'kiwi', 'pear', 'carrot', 'cucumber', 'lettuce', 'roma_vine_tomatoes', 'zucchini']
 # Load a random image from the images folder
 # file_names = next(os.walk(IMAGE_DIR))[2]
-image = skimage.io.imread(os.path.join(IMAGE_DIR, 'carrot_test.jpg'))
+image = skimage.io.imread(os.path.join(IMAGE_DIR, 'test2.jpg'))
 
 # Run detection
 results = model.detect([image], verbose=1)

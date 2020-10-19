@@ -1,17 +1,29 @@
 from flask import Flask, render_template, Response
 import cv2
+from face_recog.face_id import FaceId
+from anti_spoofing.anti_spoofing import check_authenticity
+from const.consts import SKIP_FRAMES
 
 class VideoCamera(object):
     def __init__(self):
         # 通过opencv获取实时视频流
         # url来源见我上一篇博客
-        self.video = cv2.VideoCapture("http://admin:admin@192.168.10.107:8081/") 
+        self.video = cv2.VideoCapture(0)
+        self.faceid = FaceId()
+        self.faceid.encode_faces() 
     
     def __del__(self):
         self.video.release()
     
     def get_frame(self):
         success, image = self.video.read()
+        is_real, frame_auth = check_authenticity(image.copy())
+            
+        if is_real:
+            frame = self.faceid.match_faces(image.copy())     
+            image = frame
+        else:
+            image = frame_auth
         # 因为opencv读取的图片并非jpeg格式，因此要用motion JPEG模式需要先将图片转码成jpg格式图片
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
@@ -36,4 +48,4 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')   
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=5000) 
+    app.run(host='127.0.0.1', debug=True, port=8888) 

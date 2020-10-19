@@ -6,8 +6,8 @@ from const.consts import SKIP_FRAMES
 video_capture = cv2.VideoCapture("../data/test_video_spoofing.mp4")
 faceid = FaceId()
 faceid.encode_faces()
-
 frame_index = 0
+
 while True:
     # Grab a single frame of video
     ret, frame = video_capture.read()
