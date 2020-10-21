@@ -22,7 +22,7 @@ class FaceId:
         records = RegisteredUser.query.all()
         if len(records) == 0:
             return None
-        face_encodings = dict([(user.first_name + " " + user.last_name ,pickle.loads(user.face_encoding)) for user in records])
+        face_encodings = dict([(user.first_name + " " + user.last_name, pickle.loads(user.face_encoding)) for user in records])
         return face_encodings
         
         
@@ -51,8 +51,8 @@ class FaceId:
         else:
             cv2.putText(frame, "Encoding success", (cols // 2, rows // 2), font, 1.0, (0, 255, 0), 1)
             status_code = FACE_ID_ENCODING_SUCESS
+        
         face_encoding = face_recognition.face_encodings(frame)[0]
-
         return status_code, face_encoding, frame
 
     def match_faces(self, frame):

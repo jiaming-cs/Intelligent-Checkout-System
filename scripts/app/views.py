@@ -1,7 +1,7 @@
 import pickle
 from flask_admin.contrib import sqla
 from flask_security import current_user
-from flask import  url_for, redirect,  request, abort, Response
+from flask import  url_for, redirect,  request, abort, Response, flash
 from flask_admin import BaseView, expose
 from app import db
 from app.database import RegisteredUser
@@ -80,23 +80,8 @@ class CustomView(BaseView):
         return Response(self.gen_check_identity_frame(VideoCamera()),
                         mimetype='multipart/x-mixed-replace; boundary=frame') 
 
-    def gen_face_encoding_frame(self, camera):
-        while True:
-            status ,face_encoding, frame_byte = camera.encode_face()
-            yield (status, face_encoding, b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_byte + b'\r\n\r\n')                     
-
-    @expose('/encode_face')
-    def encode_face(self):
-        status, face_encoding, frame_bytes = next(self.gen_face_encoding_frame(VideoCamera()))
-        if status == FACE_ID_ENCODING_SUCESS:
-            global user_email
-            user = db.session.query(RegisteredUser).filter(RegisteredUser.email == user_email).first()
-            user.face_encoding = pickle.dumps(face_encoding)
-            db.session.add(user)
-            db.session.commit()
-            return self.render("admin/encoding_success.html")
-        else:
-            return Response(frame_bytes, mimetype='multipart/x-mixed-replace; boundary=frame')   
+   
+          
 
 user_email = None
 
@@ -120,3 +105,27 @@ class UserRegistrationView(BaseView):
             return self.render('admin/face_encoding.html')
 
         return self.render('admin/user_registration.html', form=UserInfoForm())
+    
+    def gen_face_encoding_frame(self, camera):
+        while True:
+            status ,face_encoding, frame_byte = camera.encode_face()
+            yield (status, face_encoding, b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_byte + b'\r\n\r\n')                     
+            
+    @expose('/encode_face')
+    def encode_face(self):
+        status, face_encoding, frame_bytes = next(self.gen_face_encoding_frame(VideoCamera()))
+        if status == FACE_ID_ENCODING_SUCESS:
+            global user_email
+            user = db.session.query(RegisteredUser).filter(RegisteredUser.email == user_email).first()
+            print("*"*20)
+            print(face_encoding)
+            user.face_encoding = pickle.dumps(face_encoding)
+            db.session.add(user)
+            db.session.commit()
+            redirect(url_for("admin.user_registration.encoding_success"))
+        else:
+            return Response(frame_bytes, mimetype='multipart/x-mixed-replace; boundary=frame') 
+        
+    @expose("/encoding_success")
+    def encoding_success(self):
+        return self.render("admin/encoding_success.html")

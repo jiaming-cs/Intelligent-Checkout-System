@@ -21,8 +21,11 @@
   <div class="row">
     <!-- Left col -->
     <section class="container">      
-      
-      <img src="{{ url_for('custom.encode_face') }}">
+      {% if url_for('user_registration.encode_face') is not string %}
+      <img src="{{ url_for('user_registration.encode_face') }}">
+      {% else %}
+      <h1> success <h1>
+      {% endif %}
 
     </section>
     <!-- /.Left col -->
