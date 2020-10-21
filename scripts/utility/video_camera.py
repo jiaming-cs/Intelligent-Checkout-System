@@ -5,18 +5,16 @@ from anti_spoofing.anti_spoofing import check_authenticity
 
 class VideoCamera(object):
     def __init__(self):
-        # 通过opencv获取实时视频流
-        # url来源见我上一篇博客
-        # self.video = cv2.VideoCapture("../data/test_video_spoofing.mp4")
-        self.video = cv2.VideoCapture(0)
+        self.video = cv2.VideoCapture("../data/test_video_spoofing.mp4")
+        #self.video = cv2.VideoCapture(0)
         self.faceid = FaceId()
         self.faceid.encode_faces() 
     
     def __del__(self):
         self.video.release()
     
-    def get_frame(self):
-        success, image = self.video.read()
+    def check_identity(self):
+        rtvl, image = self.video.read()
         is_real, frame_auth = check_authenticity(image.copy())
             
         if is_real:
@@ -24,6 +22,12 @@ class VideoCamera(object):
             image = frame
         else:
             image = frame_auth
-        # 因为opencv读取的图片并非jpeg格式，因此要用motion JPEG模式需要先将图片转码成jpg格式图片
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
+
+    def encode_face(self):
+        rtvl, image = self.video.read()
+        status, face_encoding = self.faceid.encode_face(image)
+        return status, face_encoding
+
+    

@@ -4,49 +4,51 @@ import numpy as np
 import os
 import sys 
 import pickle
-from const.consts import IMAGE_DIR, DATA_DIR, FACE_DISTANCE_THRESHOLD, UNKNOWN, PICKEL_FILE_NAME
+from const.consts import FACE_DISTANCE_THRESHOLD,\
+UNKNOWN, FACE_ID_NO_PEOPLE_EXIST, FACE_ID_MORE_THAN_ONE_PEOPLE, FACE_ID_ENCODING_SUCESS
+from app import db
+from app.database import RegisteredUser
 
 class FaceId:
-    def __init__(self):
+    def __init__(self, db):
         self.face_encodings = self._load_face_encodings()
         self.known_face_names = list(self.face_encodings.keys())
         self.known_face_encodings = [self.face_encodings[name] for name in self.known_face_names]
+        self.db = db
 
     def _load_face_encodings(self):
         """
         Load face ids from pickle file
 
         """
-        if not os.path.exists(os.path.join(DATA_DIR, PICKEL_FILE_NAME)) or os.path.getsize(os.path.join(DATA_DIR, PICKEL_FILE_NAME)) <= 0:
-            return {}
-
-        with open(os.path.join(DATA_DIR, PICKEL_FILE_NAME), "rb") as f:
-            face_encodings = pickle.load(f)
+        records = RegisteredUser.query.all()
+        face_encodings = dict([(user.first_name + " " + user.last_name ,pickle.loads(user.face_encoding)) for user in records])
         return face_encodings
+        
+        
 
-    def encode_faces(self, encode_new_faces = False):
+    def encode_face(self, frame):
         '''
         Encode faces from image folder (if any) under root directory.
         The encoded object will be stored in pickle files.
         Images are expected named with format firstname_lastname.jpg
         {"name0":obj, "name1":obj} 
-        '''
-        if not encode_new_faces:
-            return
+        '''       
         
-        if not os.listdir(IMAGE_DIR):
-            return
-        # Return if there is no new images to be encoded
-        
-        
-        with open(os.path.join(DATA_DIR, PICKEL_FILE_NAME), "wb") as f:
-            for image_name in os.listdir(IMAGE_DIR):
-                user_full_name = image_name.split('.')[0]
-                image = face_recognition.load_image_file(os.path.join(IMAGE_DIR, image_name))
-                encoding = face_recognition.face_encodings(image)[0]
-                self.face_encodings[user_full_name] = encoding
-            pickle.dump(self.face_encodings, f)
-        return
+        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+        rgb_small_frame = small_frame[:, :, ::-1]
+        face_locations = face_recognition.face_locations(rgb_small_frame)
+        if len(face_locations) > 1:
+            status_code = FACE_ID_MORE_THAN_ONE_PEOPLE
+            return status_code, None
+        elif len(face_locations) == 0:
+            status_code = FACE_ID_NO_PEOPLE_EXIST
+            return status_code, None
+        else:
+            status_code = FACE_ID_ENCODING_SUCESS
+        face_encoding = face_recognition.face_encodings(frame)[0]
+
+        return status_code, face_encoding
 
     def match_faces(self, frame):
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)

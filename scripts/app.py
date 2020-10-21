@@ -1,174 +1,19 @@
 #!venv/bin/python
 import os
-from flask import Flask, url_for, redirect, render_template, request, abort, Response
+from flask import url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import Security, SQLAlchemyUserDatastore, \
-    UserMixin, RoleMixin, login_required, current_user
+from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security.utils import encrypt_password
 import flask_admin
-from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
-from flask_admin import BaseView, expose
 
-from utility.user_info_form import UserInfoForm
-from utility.video_camera import VideoCamera
-
-# Create Flask application
-app = Flask(__name__)
-app.config.from_pyfile('config.py')
-db = SQLAlchemy(app)
-
-
-# Define models
-roles_users = db.Table(
-    'roles_users',
-    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
-)
-
-
-class Role(db.Model, RoleMixin):
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255))
-
-    def __str__(self):
-        return self.name
-
-
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    email = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
-    active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
-    roles = db.relationship('Role', secondary=roles_users,
-                            backref=db.backref('users', lazy='dynamic'))
-    
-
-class RegisteredUser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    email = db.Column(db.String(255), unique=True)
-    face_encoding = db.Column(db.PickleType())
-    balance = db.Column(db.Float())
-
-    def __str__(self):
-        return self.email
-
-
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    product_name = db.Column(db.String(255))
-    product_unit_price = db.Column(db.Float())
-    product_code = db.Column(db.String(255))
-    product_discount = db.Column(db.Float())
-
-    def __str__(self):
-        return self.product_name
-
+from app import app, db
+from app.views import MyModelView, UserView, ProductView, RegisteredUserView, CustomView, UserRegistrationView
+from app.database import Role, User, Product, RegisteredUser
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
-
-
-# Create customized model view class
-class MyModelView(sqla.ModelView):
-
-    def is_accessible(self):
-        if not current_user.is_active or not current_user.is_authenticated:
-            return False
-
-        if current_user.has_role('superuser'):
-            return True
-
-        return False
-
-    def _handle_view(self, name, **kwargs):
-        """
-        Override builtin _handle_view in order to redirect users when a view is not accessible.
-        """
-        if not self.is_accessible():
-            if current_user.is_authenticated:
-                # permission denied
-                abort(403)
-            else:
-                # login
-                return redirect(url_for('security.login', next=request.url))
-
-
-    # can_edit = True
-    edit_modal = True
-    create_modal = True    
-    can_export = True
-    can_view_details = True
-    details_modal = True
-
-class UserView(MyModelView):
-    column_editable_list = ['email', 'first_name', 'last_name']
-    column_searchable_list = column_editable_list
-    column_exclude_list = ['password']
-    column_details_exclude_list = column_exclude_list
-    column_filters = column_editable_list
-
-class ProductView(MyModelView):
-    column_editable_list = ['product_name', 'product_unit_price', 'product_code', 'product_discount']
-    column_searchable_list = column_editable_list
-   
-    column_filters = column_editable_list
-    
-class RegisteredUserView(MyModelView):
-    column_editable_list = ['email', 'first_name', 'last_name', 'balance']
-    column_exclude_list = ['face_encoding']
-    column_details_exclude_list = column_exclude_list
-    column_searchable_list = column_editable_list
-    column_filters = column_editable_list
-
-
-class CustomView(BaseView):
-    @expose('/')
-    def index(self):
-        return self.render('admin/custom_index.html')
-
-    def gen(self, camera):
-        while True:
-            frame = camera.get_frame()
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
-    @expose('/video_feed')
-    def video_feed(self):
-        return Response(self.gen(VideoCamera()),
-                        mimetype='multipart/x-mixed-replace; boundary=frame')   
-
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, Length, Email, Required
-
-
-class UserRegistrationView(BaseView):
-    @expose('/', methods=['GET', 'POST'])
-    def index(self):
-        form = UserInfoForm(request.form)
-        if request.method == 'POST' and form.validate():
-            user = RegisteredUser()
-            user.first_name = form.first_name.data
-            user.last_name = form.last_name.data
-            user.email = form.email.data
-            
-            db.session.add(user)
-            db.session.commit()
-            
-            # renew rank for every one:
-
-            return self.render('admin/face_encoding.html')
-
-        return self.render('admin/user_registration.html', form=UserInfoForm())
-
 
 # Flask views
 @app.route('/')
@@ -193,6 +38,7 @@ admin.add_view(UserRegistrationView(name="User Registration view", endpoint='use
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
+
 @security.context_processor
 def security_context_processor():
     return dict(
@@ -252,10 +98,12 @@ def build_sample_db():
     return
 
 if __name__ == '__main__':
+    # Define models
+
 
     # Build a sample db on the fly, if one does not exist yet.
     app_dir = os.path.realpath(os.path.dirname(__file__))
-    database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
+    database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
     if not os.path.exists(database_path):
         build_sample_db()
 

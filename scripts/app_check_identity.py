@@ -19,8 +19,6 @@ while True:
     #frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
     # Resize frame of video to 1/4 size for faster face recognition processing
 
-
-    
     is_real, frame_auth = check_authenticity(frame.copy())
 
     if is_real:
