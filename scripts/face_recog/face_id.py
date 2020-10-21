@@ -10,11 +10,9 @@ from app import db
 from app.database import RegisteredUser
 
 class FaceId:
-    def __init__(self, db):
-        self.face_encodings = self._load_face_encodings()
-        self.known_face_names = list(self.face_encodings.keys())
-        self.known_face_encodings = [self.face_encodings[name] for name in self.known_face_names]
-        self.db = db
+    def __init__(self):
+        return
+            
 
     def _load_face_encodings(self):
         """
@@ -22,6 +20,8 @@ class FaceId:
 
         """
         records = RegisteredUser.query.all()
+        if len(records) == 0:
+            return None
         face_encodings = dict([(user.first_name + " " + user.last_name ,pickle.loads(user.face_encoding)) for user in records])
         return face_encodings
         
@@ -38,19 +38,30 @@ class FaceId:
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         rgb_small_frame = small_frame[:, :, ::-1]
         face_locations = face_recognition.face_locations(rgb_small_frame)
+        rows, cols, _ = frame.shape
+        font = cv2.FONT_HERSHEY_DUPLEX
         if len(face_locations) > 1:
             status_code = FACE_ID_MORE_THAN_ONE_PEOPLE
-            return status_code, None
+            cv2.putText(frame, "More than one people in the image", (cols // 2, rows // 2), font, 1.0, (0, 0, 255), 1)
+            return status_code, None, frame
         elif len(face_locations) == 0:
             status_code = FACE_ID_NO_PEOPLE_EXIST
-            return status_code, None
+            cv2.putText(frame, "No people in the image", (cols // 2, rows // 2), font, 1.0, (0, 0, 255), 1)
+            return status_code, None, frame
         else:
+            cv2.putText(frame, "Encoding success", (cols // 2, rows // 2), font, 1.0, (0, 255, 0), 1)
             status_code = FACE_ID_ENCODING_SUCESS
         face_encoding = face_recognition.face_encodings(frame)[0]
 
-        return status_code, face_encoding
+        return status_code, face_encoding, frame
 
     def match_faces(self, frame):
+        self.face_encodings = self._load_face_encodings()
+        if self.face_encodings:
+            self.known_face_names = list(self.face_encodings.keys())
+            self.known_face_encodings = [self.face_encodings[name] for name in self.known_face_names]
+        else:
+            return #TODO
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         rgb_small_frame = small_frame[:, :, ::-1]
 

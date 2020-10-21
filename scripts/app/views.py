@@ -1,11 +1,15 @@
+import pickle
 from flask_admin.contrib import sqla
 from flask_security import current_user
 from flask import  url_for, redirect,  request, abort, Response
 from flask_admin import BaseView, expose
 from app import db
 from app.database import RegisteredUser
+from face_recognition.api import face_encodings
 from utility.user_info_form import UserInfoForm
 from utility.video_camera import VideoCamera
+from const.consts import FACE_ID_ENCODING_SUCESS
+
 
 # Create customized model view class
 class MyModelView(sqla.ModelView):
@@ -78,17 +82,23 @@ class CustomView(BaseView):
 
     def gen_face_encoding_frame(self, camera):
         while True:
-            frame = camera.encode_face()
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')                      
+            status ,face_encoding, frame_byte = camera.encode_face()
+            yield (status, face_encoding, b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_byte + b'\r\n\r\n')                     
 
     @expose('/encode_face')
     def encode_face(self):
+        status, face_encoding, frame_bytes = next(self.gen_face_encoding_frame(VideoCamera()))
+        if status == FACE_ID_ENCODING_SUCESS:
+            global user_email
+            user = db.session.query(RegisteredUser).filter(RegisteredUser.email == user_email).first()
+            user.face_encoding = pickle.dumps(face_encoding)
+            db.session.add(user)
+            db.session.commit()
+            return self.render("admin/encoding_success.html")
+        else:
+            return Response(frame_bytes, mimetype='multipart/x-mixed-replace; boundary=frame')   
 
-        return Response(self.gen_face_encoding_frame(VideoCamera()),
-                        mimetype='multipart/x-mixed-replace; boundary=frame')   
-
-
+user_email = None
 
 class UserRegistrationView(BaseView):
     @expose('/', methods=['GET', 'POST'])
@@ -96,10 +106,12 @@ class UserRegistrationView(BaseView):
         form = UserInfoForm(request.form)
         if request.method == 'POST' and form.validate():
             user = RegisteredUser()
+            
             user.first_name = form.first_name.data
             user.last_name = form.last_name.data
             user.email = form.email.data
-            
+            global user_email
+            user_email = form.email.data
             db.session.add(user)
             db.session.commit()
             

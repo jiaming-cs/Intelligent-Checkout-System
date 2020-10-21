@@ -8,26 +8,27 @@ class VideoCamera(object):
         self.video = cv2.VideoCapture("../data/test_video_spoofing.mp4")
         #self.video = cv2.VideoCapture(0)
         self.faceid = FaceId()
-        self.faceid.encode_faces() 
+        
     
     def __del__(self):
         self.video.release()
     
     def check_identity(self):
-        rtvl, image = self.video.read()
-        is_real, frame_auth = check_authenticity(image.copy())
+        rtvl, frame = self.video.read()
+        is_real, frame_auth = check_authenticity(frame.copy())
             
         if is_real:
-            frame = self.faceid.match_faces(image.copy())     
-            image = frame
+            frame = self.faceid.match_faces(frame.copy())     
         else:
-            image = frame_auth
-        ret, jpeg = cv2.imencode('.jpg', image)
+            frame = frame_auth
+        ret, jpeg = cv2.imencode('.jpg', frame)
         return jpeg.tobytes()
 
     def encode_face(self):
-        rtvl, image = self.video.read()
-        status, face_encoding = self.faceid.encode_face(image)
-        return status, face_encoding
+        rtvl, frame = self.video.read()
+        status, face_encoding, frame = self.faceid.encode_face(frame)
+        ret, jpeg = cv2.imencode('.jpg', frame)
+
+        return status, face_encoding, jpeg.tobytes()
 
     
