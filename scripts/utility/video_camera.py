@@ -5,8 +5,8 @@ from anti_spoofing.anti_spoofing import check_authenticity
 
 class VideoCamera(object):
     def __init__(self):
-        self.video = cv2.VideoCapture("../data/test_video_spoofing.mp4")
-        #self.video = cv2.VideoCapture(0)
+        #self.video = cv2.VideoCapture("../data/test_video_spoofing.mp4")
+        self.video = cv2.VideoCapture(0)
         self.faceid = FaceId()
         
     
