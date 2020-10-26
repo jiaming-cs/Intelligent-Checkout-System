@@ -8,7 +8,7 @@ import flask_admin
 from flask_admin import helpers as admin_helpers
 
 from app import app, db
-from app.views import MyModelView, UserView, ProductView, RegisteredUserView, CustomView, UserRegistrationView
+from app.views import MyModelView, UserView, ProductView, RegisteredUserView, CheckoutView, UserRegistrationView
 from app.database import Role, User, Product, RegisteredUser
 
 # Setup Flask-Security
@@ -33,8 +33,8 @@ admin.add_view(MyModelView(Role, db.session, menu_icon_type='fa', menu_icon_valu
 admin.add_view(UserView(User, db.session, menu_icon_type='fa', menu_icon_value='fa-users', name="Users"))
 admin.add_view(ProductView(Product, db.session, menu_icon_type='fa', menu_icon_value='fa-users', name="Products"))
 admin.add_view(RegisteredUserView(RegisteredUser, db.session, menu_icon_type='fa', menu_icon_value='fa-users', name="Registered User"))
-admin.add_view(CustomView(name="Custom view", endpoint='custom', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
-admin.add_view(UserRegistrationView(name="User Registration view", endpoint='user_registration', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
+admin.add_view(CheckoutView(name="Checkout", endpoint='checkout', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
+admin.add_view(UserRegistrationView(name="User Registration", endpoint='user_registration', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
@@ -99,13 +99,11 @@ def build_sample_db():
 
 if __name__ == '__main__':
     # Define models
-
-
     # Build a sample db on the fly, if one does not exist yet.
     app_dir = os.path.realpath(os.path.dirname(__file__))
     database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
-    # if not os.path.exists(database_path):
-    build_sample_db()
+    if not os.path.exists(database_path):
+        build_sample_db()
     
     # Start app
     app.run(debug=True)

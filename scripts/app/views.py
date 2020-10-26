@@ -1,11 +1,10 @@
 import pickle
 from flask_admin.contrib import sqla
 from flask_security import current_user
-from flask import  url_for, redirect,  request, abort, Response, flash
+from flask import  url_for, redirect, request, abort, Response
 from flask_admin import BaseView, expose
 from app import db
 from app.database import RegisteredUser
-from face_recognition.api import face_encodings
 from utility.user_info_form import UserInfoForm
 from utility.video_camera import VideoCamera
 from const.consts import FACE_ID_ENCODING_SUCESS
@@ -64,10 +63,10 @@ class RegisteredUserView(MyModelView):
     column_filters = column_editable_list
 
 
-class CustomView(BaseView):
+class CheckoutView(BaseView):
     @expose('/')
     def index(self):
-        return self.render('admin/custom_index.html')
+        return self.render('admin/checkout.html')
 
     def gen_check_identity_frame(self, camera):
         while True:
@@ -80,9 +79,6 @@ class CustomView(BaseView):
         return Response(self.gen_check_identity_frame(VideoCamera()),
                         mimetype='multipart/x-mixed-replace; boundary=frame') 
 
-   
-          
-
 user_email = None
 
 class UserRegistrationView(BaseView):
@@ -91,7 +87,6 @@ class UserRegistrationView(BaseView):
         form = UserInfoForm(request.form)
         if request.method == 'POST' and form.validate():
             user = RegisteredUser()
-            
             user.first_name = form.first_name.data
             user.last_name = form.last_name.data
             user.email = form.email.data
@@ -99,9 +94,6 @@ class UserRegistrationView(BaseView):
             user_email = form.email.data
             db.session.add(user)
             db.session.commit()
-            
-            # renew rank for every one:
-
             return self.render('admin/face_encoding.html')
 
         return self.render('admin/user_registration.html', form=UserInfoForm())
@@ -117,15 +109,10 @@ class UserRegistrationView(BaseView):
         if status == FACE_ID_ENCODING_SUCESS:
             global user_email
             user = db.session.query(RegisteredUser).filter(RegisteredUser.email == user_email).first()
-            print("*"*20)
-            print(face_encoding)
             user.face_encoding = pickle.dumps(face_encoding)
             db.session.add(user)
             db.session.commit()
-            redirect(url_for("admin.user_registration.encoding_success"))
-        else:
-            return Response(frame_bytes, mimetype='multipart/x-mixed-replace; boundary=frame') 
+
+        return Response(frame_bytes, mimetype='multipart/x-mixed-replace; boundary=frame') 
         
-    @expose("/encoding_success")
-    def encoding_success(self):
-        return self.render("admin/encoding_success.html")
+    
