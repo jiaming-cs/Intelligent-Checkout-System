@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 # Root directory of the project
-ROOT_DIR = os.path.abspath("../")
+ROOT_DIR = os.path.abspath("./")
 
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
@@ -18,6 +18,7 @@ from mrcnn import visualize
 # Import COCO config
 # sys.path.append(os.path.join(ROOT_DIR, "samples/coco/"))  # To find local version
 from mrcnn.config import Config
+from utility.items_displayer import display_items
 
 
 
@@ -83,5 +84,7 @@ results = model.detect([image], verbose=1)
 r = results[0]
 # Visualize results
 
-visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], 
-                            class_names, r['scores'])
+
+display_items(os.path.join(IMAGE_DIR, 'test2.jpg'), r, class_names)
+
+# visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
