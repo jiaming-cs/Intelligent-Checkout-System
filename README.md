@@ -22,10 +22,10 @@ The barcode based self-checkout system has been widely utilized in grocery store
 To train the object detection model, we are going to use MVTec Densely Segmented Supermarket Dataset (MVTec D2S). D2S contains 21,000 high-resolution images that belong to 60 categories. The objects include groceries and everyday products which are exactly what is necessary for this project. The dataset includes images with pixel-wise labels of all object instances which can be used to train the object recognition model. 
 
 ## Progress
-* Itegrated face recognition and anti-spoofing :white_check_mark:
-* Trained Msk R-CNN on subdataset of D2S. (12 classes) :white_check_mark:
-* Build database :x:
-* Design web GUI :x:
+* Integrated face recognition and anti-spoofing :white_check_mark:
+* Trained Mask R-CNN on subdataset of D2S. (12 classes) :white_check_mark:
+* Build Database :x:
+* Design Web GUI :x:
 
 ## Usage
 
