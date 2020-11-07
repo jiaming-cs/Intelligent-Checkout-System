@@ -6,26 +6,26 @@ The barcode based self-checkout system has been widely utilized in grocery store
 
 ## Functionality
 
-* Determine the purchased itmes and caculate the subtotal 
-* Verify customer identity
+* Determine the purchased items and calculate the subtotal 
+* Verify customers identity
 * Web-based user interface for both customers and administrators
 
 ## Solutions
 
 * Implement object detection using Mask R-CNN model.
-* Encode customers' face and save the feature vector to pick file
-* Load the pickel file to verify customers' identity using face_recognition libray of python, to protect customers' property security, we are using anti-spoofing model to check if it is a fake face first.
+* Encode customers' faces and save the feature vector to pickel file
+* Load the pickel file to verify customers' identity using face_recognition library of python, to protect customers' property security, we are using anti-spoofing model to check if it is a fake face first.
 * Build our web-based GUI using Flask, Nginx and Gunicorn
 
 ## Dataset
 
-To train the objection detection model, we are going to use MVTec Densely Segmented Supermarket Dataset (MVTec D2S). D2S contains 21,000 high-resolution images that belong to 60 categories. The objects include groceries and everyday products which are exactly what is necessary for this project. The dataset includes images with pixel-wise labels of all object instances which can be used to train the objection recognition model. 
+To train the object detection model, we are going to use MVTec Densely Segmented Supermarket Dataset (MVTec D2S). D2S contains 21,000 high-resolution images that belong to 60 categories. The objects include groceries and everyday products which are exactly what is necessary for this project. The dataset includes images with pixel-wise labels of all object instances which can be used to train the object recognition model. 
 
 ## Progress
-* Itegrated face recognition and anti-spoofing :white_check_mark:
-* Trained Msk R-CNN on subdataset of D2S. (12 classes) :white_check_mark:
-* Build database :x:
-* Design web GUI :x:
+* Integrated face recognition and anti-spoofing :white_check_mark:
+* Trained Mask R-CNN on subdataset of D2S. (12 classes) :white_check_mark:
+* Build Database :x:
+* Design Web GUI :x:
 
 ## Usage
 
@@ -79,6 +79,6 @@ pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.
 ### Run our Mask R-CNN test
 
 ```
-(venv)~/Intelligent-Checkout-System/scripts python test_Mask-RCNN
+(venv)~/Intelligent-Checkout-System/scripts python test_Mask-RCNN.py
 
 ```
