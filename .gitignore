@@ -3,3 +3,4 @@
 /venv
 **/__pycache__
 /models/mask_rcnn_model/mask_rcnn_d2s_0100.h5
+*.txt
