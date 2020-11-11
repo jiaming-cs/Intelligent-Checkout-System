@@ -30,5 +30,11 @@ class VideoCamera(object):
         ret, jpeg = cv2.imencode('.jpg', frame)
 
         return status, face_encoding, jpeg.tobytes()
+    
+    def read_frame(self):
+        rtvl, frame = self.video.read()
+        ret, jpeg = cv2.imencode('.jpg', frame)
+
+        return jpeg.tobytes()
 
     

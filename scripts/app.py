@@ -100,10 +100,16 @@ def build_sample_db():
 if __name__ == '__main__':
     # Define models
     # Build a sample db on the fly, if one does not exist yet.
-    app_dir = os.path.realpath(os.path.dirname(__file__))
-    database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
-    if not os.path.exists(database_path):
-        build_sample_db()
+    # app_dir = os.path.realpath(os.path.dirname(__file__))
+    # database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
+    # if not os.path.exists(database_path):
+    #     build_sample_db()
     
-    # Start app
-    app.run(debug=True)
+    # # Start app
+    # app.run(debug=True)
+    from utility.mask_rcnn import MaskRCNN
+    import cv2
+    
+    model = MaskRCNN()
+    img = cv2.imread("../test_img/banana.jpg")
+    cv2.imshow("out", model.detect(img))

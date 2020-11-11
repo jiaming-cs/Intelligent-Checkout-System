@@ -20,9 +20,18 @@
 
   <div class="row">
     <!-- Left col -->
-    <section class="container">      
-    <img src="{{ url_for('user_registration.encode_face') }}">
-      
+    <section class="container">   
+    {%if not frame %}   
+    <img src="{{ url_for('user_registration.gen_frame') }}">
+    {%else%}
+    <img src="{{ url_for('user_registration.encoded_face') }}">
+    {%endif%}
+    <br>
+    <br>
+    <form action="{{ url_for('user_registration.encode_face') }}" method="POST">  
+    {{form.submit}}
+    </form>
+    </section>
 
     </section>
     <!-- /.Left col -->
