@@ -44,7 +44,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_name = db.Column(db.String(255))
     product_unit_price = db.Column(db.Float())
-    product_code = db.Column(db.String(255))
+    product_code = db.Column(db.Integer)
     product_discount = db.Column(db.Float())
 
     def __str__(self):

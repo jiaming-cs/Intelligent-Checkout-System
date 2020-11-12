@@ -95,15 +95,37 @@ def build_sample_db():
                 roles=[user_role, ]
             )
         db.session.commit()
+        
+        product_names = ['coca', 'coca_cola_light_05', 'avocado', 'banana_bundle', 'banana_single', 'kiwi', 'pear', 'carrot', 'cucumber', 'lettuce', 'roma_vine_tomatoes', 'zucchini']
+        product_price = [2.5, 2.5, 2, 2, 0.5, 0.99, 1, 1.5, 0.5, 2.5, 3, 0.8]
+        product_discount = [1]*12
+        for i, product_name in enumerate(product_names):
+            product = Product(product_name = product_name,
+                              product_unit_price = product_price[i],
+                              product_discount = product_discount[i],
+                              product_code = i+1)
+            db.session.add(product)
+            db.session.commit()
+        
+                 
     return
 
 if __name__ == '__main__':
     # Define models
     # Build a sample db on the fly, if one does not exist yet.
-    app_dir = os.path.realpath(os.path.dirname(__file__))
-    database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
-    if not os.path.exists(database_path):
-        build_sample_db()
+    # app_dir = os.path.realpath(os.path.dirname(__file__))
+    # database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
+    # if not os.path.exists(database_path):
+    #     build_sample_db()
     
-    # Start app
-    app.run(debug=True)
+    # # Start app
+    # app.run(debug=True)
+    
+    from utility.mask_rcnn import MaskRCNN
+    import cv2
+    
+    model = MaskRCNN()
+    img = cv2.imread("../test_img/banana.jpg")
+    # print(model.get_subtotal_text([5, 4]))
+    cv2.imshow("out", model.detect(img))
+    cv2.waitKey(0)

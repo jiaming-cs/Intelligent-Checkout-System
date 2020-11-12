@@ -5,7 +5,9 @@ from flask import  url_for, redirect, request, abort, Response
 from flask_admin import BaseView, expose
 from app import db
 from app.database import RegisteredUser
+from flask.templating import render_template
 from utility.user_info_form import UserInfoForm
+from utility.post_form import PostForm
 from utility.video_camera import VideoCamera
 from const.consts import FACE_ID_ENCODING_SUCESS
 
@@ -80,12 +82,15 @@ class CheckoutView(BaseView):
                         mimetype='multipart/x-mixed-replace; boundary=frame') 
 
 user_email = None
+encoded_frame = None
 
 class UserRegistrationView(BaseView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
         form = UserInfoForm(request.form)
         if request.method == 'POST' and form.validate():
+            global encoded_frame
+            encoded_frame = None
             user = RegisteredUser()
             user.first_name = form.first_name.data
             user.last_name = form.last_name.data
@@ -94,7 +99,7 @@ class UserRegistrationView(BaseView):
             user_email = form.email.data
             db.session.add(user)
             db.session.commit()
-            return self.render('admin/face_encoding.html')
+            return self.render('admin/face_encoding.html', frame = None, form = PostForm())
 
         return self.render('admin/user_registration.html', form=UserInfoForm())
     
@@ -102,17 +107,42 @@ class UserRegistrationView(BaseView):
         while True:
             status ,face_encoding, frame_byte = camera.encode_face()
             yield (status, face_encoding, b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_byte + b'\r\n\r\n')                     
+    
+    def get_frame(self, camera):
+        while True:
+            frame_byte = camera.read_frame()
+            yield  b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_byte + b'\r\n\r\n' 
             
-    @expose('/encode_face')
+    @expose('/gen_frame')
+    def gen_frame(self):
+        return Response(self.get_frame(VideoCamera()),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')   
+    
+    @expose('/encoded_face')
+    def encoded_face(self):
+        return Response(encoded_frame,
+                    mimetype='multipart/x-mixed-replace; boundary=frame')   
+        
+    @expose('/encode_face', methods=["POST", "GET"])
     def encode_face(self):
-        status, face_encoding, frame_bytes = next(self.gen_face_encoding_frame(VideoCamera()))
-        if status == FACE_ID_ENCODING_SUCESS:
-            global user_email
-            user = db.session.query(RegisteredUser).filter(RegisteredUser.email == user_email).first()
-            user.face_encoding = pickle.dumps(face_encoding)
-            db.session.add(user)
-            db.session.commit()
+        global encoded_frame
+        if not encoded_frame:
+            status, face_encoding, frame_bytes = next(self.gen_face_encoding_frame(VideoCamera()))
+            encoded_frame = frame_bytes
+            if status == FACE_ID_ENCODING_SUCESS:
+                global encode_success
+                encode_success = True
+                global user_email
+                user = db.session.query(RegisteredUser).filter(RegisteredUser.email == user_email).first()
+                user.face_encoding = pickle.dumps(face_encoding)
+                db.session.add(user)
+                db.session.commit()
+                return self.render('admin/face_encoding.html', frame = frame_bytes, form = PostForm())
+              
+    
+       
+            
 
-        return Response(frame_bytes, mimetype='multipart/x-mixed-replace; boundary=frame') 
+        
         
     
