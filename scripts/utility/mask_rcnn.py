@@ -4,6 +4,10 @@ import cv2
 import numpy as np
 import skimage.io
 import matplotlib.pyplot as plt
+from app import db
+from app.database import Product
+from numpy.core.fromnumeric import product
+
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
@@ -76,21 +80,72 @@ class MaskRCNN():
     def draw_result(self, frame, r):
         def get_random_color():
             return np.random.randint(255, size=(3, ))
+        font = cv2.FONT_HERSHEY_DUPLEX
         for i, bbox in enumerate(r["rois"]):
             color = get_random_color()
             color = (int(color[0]), int(color[1]), int(color[2]))
             class_name = self.class_names[r["class_ids"][i]]
             score = r["scores"][i]
             frame = cv2.rectangle(frame, (bbox[1], bbox[0]), (bbox[3], bbox[2]), tuple(color), 3)
-            font = cv2.FONT_HERSHEY_DUPLEX
-            cv2.putText(frame, "{}:{}".format(class_name, score), (bbox[1] - 10, bbox[0] -10), font, 1.0, color, 1)
+            cv2.putText(frame, "{}:{:.2f}".format(class_name, score), (bbox[1] - 10, bbox[0] -10), font, 1.0, color, 1)
+        subtotal_text = self.get_subtotal_text([i for i in r["class_ids"]])
+        
+        position = (30, 30)
+        font_scale = 0.75
+        color = (255, 0, 0)
+        thickness = 3
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        line_type = cv2.LINE_AA
+        text_size, _ = cv2.getTextSize(subtotal_text, font, font_scale, thickness)
+        line_height = text_size[1] + 5
+        x, y0 = position
+        for i, line in enumerate(subtotal_text.split("\n")):
+            y = y0 + i * line_height
+            cv2.putText(frame,
+                        line,
+                        (x, y),
+                        font,
+                        font_scale,
+                        color,
+                        thickness,
+                        line_type)
+        
+        
         return frame
          
     def detect(self, frame):
         results = self.model.detect([frame], verbose=1)
-
         r = results[0]
-
         frame = self.draw_result(frame, r)
-        
         return frame
+    
+    def get_subtotal_text(self, product_ids):
+        
+        price_table = {}
+        product_list , product_prices = [], []
+        if not product_ids:
+            return "No Items Found"
+        products = Product.query.all()
+        
+        for pro in products:
+            price_table[pro.product_code] = (pro.product_name, pro.product_discount * pro.product_unit_price)
+       
+        for id_ in product_ids:
+            name, price = price_table[id_]
+            product_list.append(name)
+            product_prices.append(price)
+            
+        subtoatl_text = ""
+        subtotal = 0
+        for name, price in zip(product_list, product_prices):
+            subtoatl_text += "{}    x1    {:.2f}$".format(name, price)
+            subtoatl_text += "\n"
+            subtotal += price
+        subtoatl_text += "Subtotal : {:.2f}".format(subtotal)
+        
+        return subtoatl_text
+            
+            
+        
+            
+    
