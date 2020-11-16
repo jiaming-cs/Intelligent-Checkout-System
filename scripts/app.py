@@ -125,7 +125,10 @@ if __name__ == '__main__':
     import cv2
     
     model = MaskRCNN()
-    img = cv2.imread("../test_img/banana.jpg")
-    # print(model.get_subtotal_text([5, 4]))
-    cv2.imshow("out", model.detect(img))
-    cv2.waitKey(0)
+    for i in range(1, 9):
+        img = cv2.imread(f"../test_img/{i}.jpg")
+        # print(model.get_subtotal_text([5, 4]))
+        img = model.detect(img)
+        #cv2.imshow("out", model.detect(img))
+        cv2.imwrite(f"../{i}_pred.jpg", img)
+        # cv2.waitKey(0)

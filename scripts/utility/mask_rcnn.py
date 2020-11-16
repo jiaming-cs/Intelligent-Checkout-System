@@ -80,22 +80,21 @@ class MaskRCNN():
     def draw_result(self, frame, r):
         def get_random_color():
             return np.random.randint(255, size=(3, ))
-        font = cv2.FONT_HERSHEY_DUPLEX
+        font = cv2.FONT_HERSHEY_SIMPLEX
         for i, bbox in enumerate(r["rois"]):
             color = get_random_color()
             color = (int(color[0]), int(color[1]), int(color[2]))
             class_name = self.class_names[r["class_ids"][i]]
             score = r["scores"][i]
             frame = cv2.rectangle(frame, (bbox[1], bbox[0]), (bbox[3], bbox[2]), tuple(color), 3)
-            cv2.putText(frame, "{}:{:.2f}".format(class_name, score), (bbox[1] - 10, bbox[0] -10), font, 1.0, color, 1)
+            cv2.putText(frame, "{}:{:.2f}".format(class_name, score), (bbox[1] - 10, bbox[0] -10), font, 2, color, 2)
         subtotal_text = self.get_subtotal_text([i for i in r["class_ids"]])
         
-        position = (30, 30)
-        font_scale = 0.75
-        color = (255, 0, 0)
+        position = (100, 100)
+        font_scale = 3
+        color = (255, 255, 255)
         thickness = 3
         font = cv2.FONT_HERSHEY_SIMPLEX
-        line_type = cv2.LINE_AA
         text_size, _ = cv2.getTextSize(subtotal_text, font, font_scale, thickness)
         line_height = text_size[1] + 5
         x, y0 = position
@@ -108,7 +107,7 @@ class MaskRCNN():
                         font_scale,
                         color,
                         thickness,
-                        line_type)
+                        )
         
         
         return frame
