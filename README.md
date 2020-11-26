@@ -24,8 +24,8 @@ To train the object detection model, we are going to use MVTec Densely Segmented
 ## Progress
 * Integrated face recognition and anti-spoofing :white_check_mark:
 * Trained Mask R-CNN on subdataset of D2S. (12 classes) :white_check_mark:
-* Build Database :x:
-* Design Web GUI :x:
+* Build Database :white_check_mark:
+* Design Web GUI :white_check_mark:
 
 ## Usage
 
