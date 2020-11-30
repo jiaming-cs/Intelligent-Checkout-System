@@ -1,0 +1,75 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+
+{% if current_user.is_authenticated %}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+  <h1>
+    Checkout 
+    <small>The system will first check your identity then detect the items you buy.</small>
+  </h1>
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+    <li class="active">Checkout</li>
+  </ol>
+</section>
+
+<section class="content">
+
+  <div class="row">
+    <!-- Left col -->
+    <section class="container">      
+      
+      <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+      </form>
+      {% if img %}
+      <img src={{ url_for('static', filename = 'img/img_res.png') }}>
+      {% endif %}
+
+    </section>
+    <!-- /.Left col -->
+
+  </div>
+  <!-- /.row (main row) -->
+
+</section>
+<!-- /.content -->
+{% else %}
+
+<center>
+  <section class="content" style="color: white">
+    <div class="col-sm-12">
+      <h1>Intelligent Checkout System</h1>
+      <p class="lead">
+        Authentication
+      </p>
+      <p>
+        This webpage works as a GUI for our designed Intelligent Checkout System. <br> <br>
+      </p>
+      {% if not current_user.is_authenticated %}
+      <p>You can register as a regular user (Customer Use), or log in as a superuser (Merchant Use) with the following credentials: <br><br>
+
+        email: <b>admin</b> <br>
+        password: <b>admin</b> <br>
+        <br>
+        <p>
+          <a class="btn btn-primary" href="{{ url_for('security.login') }}">Login</a> <a class="btn btn-default" href="{{ url_for('security.register') }}">Register</a>
+        </p>
+        {% endif %}
+        <br>
+        <p>
+          <a class="btn btn-primary" href="/"><i class="glyphicon glyphicon-chevron-left"></i> Back</a>
+        </p>
+      </div>
+    </section>
+  </center>
+
+  <br><br><br><br><br><br><br><br><br>
+  <br><br><br><br><br><br><br><br><br><br>
+  {% endif %}
+
+  {% endblock body %}

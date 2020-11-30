@@ -1,17 +1,22 @@
 import pickle
 from flask_admin.contrib import sqla
 from flask_security import current_user
-from flask import  url_for, redirect, request, abort, Response
+from flask import  url_for, redirect, request, abort, Response, flash
 from flask_admin import BaseView, expose
 from app import db
-from app.database import RegisteredUser
+from app.database import RegisteredUser, Product
 from flask.templating import render_template
 from utility.user_info_form import UserInfoForm
 from utility.post_form import PostForm
 from utility.video_camera import VideoCamera
 from const.consts import FACE_ID_ENCODING_SUCESS
+from werkzeug.utils import secure_filename
+import os
 
 
+import cv2
+
+    
 # Create customized model view class
 class MyModelView(sqla.ModelView):
 
@@ -138,11 +143,47 @@ class UserRegistrationView(BaseView):
                 db.session.add(user)
                 db.session.commit()
                 return self.render('admin/face_encoding.html', frame = frame_bytes, form = PostForm())
-              
-    
-       
-            
 
-        
+import tensorflow as tf
+from utility.mask_rcnn import MaskRCNN
+g = tf.Graph()
+with g.as_default():
+    print("Loading model")
+    model = MaskRCNN()
+
+class ObjectDetectionView(BaseView):
+    
+    def allowed_file(self, filename):
+        return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'png', 'jpg'}
+           
+    @expose('/', methods=['GET', 'POST'])
+    def index(self):
+        global model, g
+        if request.method == 'POST':
+            # check if the post request has the file part
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # if user does not select file, browser also
+            # submit an empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and self.allowed_file(file.filename):
+                
+                filename = 'img.jpg'
+                file.save(os.path.join(os.path.join(os.path.dirname(__file__), "static", "img"), filename))
+                img = cv2.imread(os.path.join(os.path.join(os.path.dirname(__file__), "static", "img"), filename))
+                with g.as_default():
+                    img = model.detect(img)
+                cv2.imwrite(os.path.join(os.path.join(os.path.dirname(__file__), "static", "img"), "img_res.png"), img)
+                return self.render('admin/object_detection.html', img = True)
+            
+        return self.render('admin/object_detection.html', img = False)
+    
+    
+    
         
     

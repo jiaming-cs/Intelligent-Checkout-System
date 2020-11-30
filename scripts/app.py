@@ -8,17 +8,28 @@ import flask_admin
 from flask_admin import helpers as admin_helpers
 
 from app import app, db
-from app.views import MyModelView, UserView, ProductView, RegisteredUserView, CheckoutView, UserRegistrationView
+from app.views import MyModelView, UserView, ProductView, RegisteredUserView, CheckoutView, UserRegistrationView, ObjectDetectionView
 from app.database import Role, User, Product, RegisteredUser
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
+def get_product_num():
+    return db.session.query(Product).count()
+
+def get_registereduser_num():
+    return db.session.query(RegisteredUser).count()
+
 # Flask views
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.context_processor
+def inject_paths():
+    return dict(product_num = get_product_num(),
+                registereduser_num = get_registereduser_num())
 
 # Create admin
 admin = flask_admin.Admin(
@@ -35,6 +46,7 @@ admin.add_view(ProductView(Product, db.session, menu_icon_type='fa', menu_icon_v
 admin.add_view(RegisteredUserView(RegisteredUser, db.session, menu_icon_type='fa', menu_icon_value='fa-users', name="Registered User"))
 admin.add_view(CheckoutView(name="Checkout", endpoint='checkout', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
 admin.add_view(UserRegistrationView(name="User Registration", endpoint='user_registration', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
+admin.add_view(ObjectDetectionView(name="Object Detection", endpoint='obj_detection', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
@@ -113,22 +125,22 @@ def build_sample_db():
 if __name__ == '__main__':
     # Define models
     # Build a sample db on the fly, if one does not exist yet.
-    # app_dir = os.path.realpath(os.path.dirname(__file__))
-    # database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
-    # if not os.path.exists(database_path):
-    #     build_sample_db()
+    app_dir = os.path.realpath(os.path.dirname(__file__))
+    database_path = os.path.join(app_dir, 'app',  app.config['DATABASE_FILE'])
+    if not os.path.exists(database_path):
+        build_sample_db()
     
-    # # Start app
-    # app.run(debug=True)
+    # Start app
+    app.run(debug=True)
     
-    from utility.mask_rcnn import MaskRCNN
-    import cv2
+    # from utility.mask_rcnn import MaskRCNN
+    # import cv2
     
-    model = MaskRCNN()
-    for i in range(1, 9):
-        img = cv2.imread(f"../test_img/{i}.jpg")
-        # print(model.get_subtotal_text([5, 4]))
-        img = model.detect(img)
-        #cv2.imshow("out", model.detect(img))
-        cv2.imwrite(f"../{i}_pred.jpg", img)
-        # cv2.waitKey(0)
+    # model = MaskRCNN()
+    # for i in range(1, 9):
+    #     img = cv2.imread(f"../images/{i}.jpg")
+    #     # print(model.get_subtotal_text([5, 4]))
+    #     img = model.detect(img)
+    #     cv2.imshow("out", img)
+    #     # cv2.imwrite(f"../{i}_pred.jpg", img)
+    #     cv2.waitKey(0)

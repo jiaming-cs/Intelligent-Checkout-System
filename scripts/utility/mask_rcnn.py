@@ -143,8 +143,7 @@ class MaskRCNN():
         subtoatl_text += "Subtotal : {:.2f}".format(subtotal)
         
         return subtoatl_text
-            
-            
+                    
         
             
     
